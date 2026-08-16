@@ -198,8 +198,12 @@ bool USBHIDInterface::processRawReport(const uint8_t* data, uint8_t* dest, size_
 
     if (is_first) {
         // ── Start of a new message ────────────────────────────────────────
-        if (total_len == 0 || total_len > HID_MAX_MSG_SIZE) {
+        if (total_len == 0 || total_len > HID_MAX_MSG_SIZE || total_len > MAX_FRAME_SIZE) {
             // Invalid total length; discard.
+            // Upper bound is MAX_FRAME_SIZE: this is the maximum a caller of
+            // checkRecvFrame() (e.g. MyMesh::cmd_frame) can safely receive.
+            // The HID_MAX_MSG_SIZE internal buffer is larger to allow future
+            // growth, but we must not overflow the caller's buffer.
             resetReassembly();
             return false;
         }
