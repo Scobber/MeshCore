@@ -13,7 +13,8 @@ enum class InterfaceType : uint8_t {
   USB,
   WiFi,
   Ethernet,
-  HardwareSerial
+  HardwareSerial,
+  HID
 };
 
 class MultiSerialInterface : public BaseSerialInterface {

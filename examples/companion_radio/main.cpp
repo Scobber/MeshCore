@@ -51,6 +51,17 @@ MultiSerialInterface interface_manager;
   ArduinoSerialInterface usb_serial_interface;
 #endif
 
+// include USB HID interface (nRF52840 vendor HID Companion transport)
+// MESH_USB_HID must be defined in build_flags; do not combine with BLE or
+// ENABLE_USB_INTERFACE on the same build because the Companion traffic would
+// then be duplicated.  CDC serial (Serial) remains available for debug output.
+#if defined(MESH_USB_HID)
+  #include <helpers/nrf52/USBHIDInterface.h>
+  // Must be a global so the Adafruit_USBD_HID constructor runs before
+  // initVariant() starts TinyUSB (see USBHIDInterface.h).
+  USBHIDInterface usb_hid_interface;
+#endif
+
 // include ethernet interface
 #if defined(ETHERNET_ENABLED)
   #include <helpers/ethernet/EthernetInterface.h>
@@ -214,6 +225,12 @@ void setup() {
 #if defined(ENABLE_USB_INTERFACE)
   usb_serial_interface.begin(Serial);
   interface_manager.addInterface(InterfaceType::USB, &usb_serial_interface);
+#endif
+
+// add USB HID interface
+#if defined(MESH_USB_HID)
+  usb_hid_interface.begin();
+  interface_manager.addInterface(InterfaceType::HID, &usb_hid_interface);
 #endif
 
 // add ethernet interface
